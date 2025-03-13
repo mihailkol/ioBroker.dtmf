@@ -1,35 +1,31 @@
 {
-  "name": "iobroker.ping",
-  "description": "This adapter cyclic polls configured IPs.",
-  "version": "1.7.9",
-  "author": "bluefox <dogafox@gmail.com>",
+  "name": "iobroker.dtmf-modem",
+  "description": "This adapter allows controlling a modem using DTMF signals.",
+  "version": "1.0.0",
+  "author": "Mikhail KOlesnikov <m89139158466@gmail.com>",
   "contributors": [
-    "bluefox <dogafox@gmail.com>",
-    "Viktor Demydov <vdemidov@gmail.com>",
-    "basti4557 <sebastian@vindicators.de>"
+    "Mikhail KOlesnikov <m89139158466@gmail.com>"
   ],
-  "homepage": "https://github.com/ioBroker/ioBroker.ping",
+  "homepage": "https://github.com/mihailkol/ioBroker.dtmf/",
   "license": "MIT",
   "keywords": [
     "ioBroker",
-    "ping",
+    "dtmf",
+    "modem",
     "home automation"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ioBroker/ioBroker.ping"
+    "url": "https://github.com/mihailkol/ioBroker.dtmf"
   },
   "engines": {
     "node": ">= 18"
   },
-  "optionalDependencies": {
-    "@network-utils/arp-lookup": "^2.1.0"
-  },
   "dependencies": {
     "@iobroker/adapter-core": "~3.2.3",
     "@iobroker/i18n": "^0.2.2",
-    "ip": "^2.0.1",
-    "@network-utils/vendor-lookup": "^1.0.9"
+    "serialport": "^10.5.0", // Для работы с последовательным портом
+    "node-dtmf": "^1.0.0" // Для обработки DTMF
   },
   "devDependencies": {
     "@alcalzone/release-script": "^3.8.0",
@@ -47,7 +43,7 @@
     "puppeteer": "^23.9.0"
   },
   "bugs": {
-    "url": "https://github.com/ioBroker/ioBroker.ping/issues"
+    "url": "https://github.com/mihailkol/ioBroker.dtmf/issues"
   },
   "main": "main.js",
   "files": [
