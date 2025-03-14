@@ -82,7 +82,10 @@ class DtmfAdapter extends utils.Adapter {
             native: {},
         });
 
-        this.log.info("Adapter ready");
+        // Обновляем объекты пользователей и устройств
+        await this.updateUsersAndDevices();
+
+        this.log.info('Adapter ready and objects created');
     }
 
     /**
@@ -100,27 +103,79 @@ class DtmfAdapter extends utils.Adapter {
      * Обработка сообщений
      */
     async onMessage(obj) {
-        if (typeof obj === "object" && obj.command) {
+        if (typeof obj === 'object' && obj.command) {
             this.log.debug(`Received message: ${JSON.stringify(obj)}`);
 
             switch (obj.command) {
-                case "saveSettings":
+                case 'saveSettings':
                     // Сохранение настроек
                     this.config = obj.message;
                     await this.saveConfig();
-                    this.log.info("Settings saved");
+                    this.log.info('Settings saved');
+
+                    // Обновляем объекты настроек модема
+                    await this.setStateAsync('modemSettings.port', this.config.modemPort, true);
+                    await this.setStateAsync('modemSettings.baudRate', this.config.modemBaudRate, true);
+
+                    // Создаем/обновляем объекты для пользователей и устройств
+                    await this.updateUsersAndDevices();
+
                     this.sendTo(obj.from, obj.command, { success: true }, obj.callback);
                     break;
 
-                case "closeSettings":
+                case 'closeSettings':
                     // Закрытие настроек
-                    this.log.info("Settings closed");
+                    this.log.info('Settings closed');
                     this.sendTo(obj.from, obj.command, { success: true }, obj.callback);
                     break;
 
                 default:
                     this.log.warn(`Unknown command: ${obj.command}`);
                     break;
+            }
+        }
+    }
+
+    async updateUsersAndDevices() {
+        // Обработка пользователей
+        if (Array.isArray(this.config.users)) {
+            for (const user of this.config.users) {
+                const userId = `users.${user.name.replace(/[^a-zA-Z0-9]/g, '_')}`; // Заменяем спецсимволы в имени
+                await this.setObjectNotExistsAsync(userId, {
+                    type: 'state',
+                    common: {
+                        name: user.name,
+                        type: 'string',
+                        role: 'info',
+                        read: true,
+                        write: false,
+                    },
+                    native: {},
+                });
+
+                await this.setStateAsync(`${userId}.phone`, user.phone, true);
+                await this.setStateAsync(`${userId}.devices`, user.devices, true);
+            }
+        }
+
+        // Обработка устройств
+        if (Array.isArray(this.config.devices)) {
+            for (const device of this.config.devices) {
+                const deviceId = `devices.${device.name.replace(/[^a-zA-Z0-9]/g, '_')}`; // Заменяем спецсимволы в имени
+                await this.setObjectNotExistsAsync(deviceId, {
+                    type: 'state',
+                    common: {
+                        name: device.name,
+                        type: 'string',
+                        role: 'info',
+                        read: true,
+                        write: false,
+                    },
+                    native: {},
+                });
+
+                await this.setStateAsync(`${deviceId}.object`, device.object, true);
+                await this.setStateAsync(`${deviceId}.dtmfCommand`, device.dtmfCommand, true);
             }
         }
     }
