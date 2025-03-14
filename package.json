@@ -57,7 +57,7 @@
   "engines": {
     "node": ">=18"
   },
-  "main": "build/main.js",
+  "main": "main.js",
   "scripts": {
     "prebuild": "rimraf ./build",
     "build": "build-adapter ts",
