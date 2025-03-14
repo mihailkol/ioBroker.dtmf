@@ -1,0 +1,139 @@
+{
+	"type": "tabs",
+	"tabsStyle": {
+		"width": "calc(100% - 100px)"
+	},
+	"i18n": true,
+	"items": {
+		"modemTab": {
+			"type": "panel",
+			"label": "Modem Settings",
+			"items": {
+				"modemPort": {
+					"type": "text",
+					"newLine": true,
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 4,
+					"xl": 4,
+					"label": "Modem Port",
+					"help": "The port where the modem is connected (e.g., /dev/ttyUSB0).",
+					"default": "/dev/ttyUSB0"
+				},
+				"modemBaudRate": {
+					"type": "number",
+					"newLine": true,
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 4,
+					"xl": 4,
+					"label": "Baud Rate",
+					"help": "The baud rate for the modem connection (e.g., 9600).",
+					"default": 9600,
+					"min": 1200,
+					"max": 115200
+				}
+			}
+		},
+		"usersTab": {
+			"type": "panel",
+			"label": "Users",
+			"items": {
+				"users": {
+					"type": "table",
+					"newLine": true,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12,
+					"label": "Users",
+					"uniqueColumns": [ "name" ],
+					"items": [
+						{
+							"type": "text",
+							"title": "Name",
+							"width": "30%",
+							"attr": "name",
+							"filter": false,
+							"sort": false,
+							"default": "",
+							"placeholder": "Enter user name"
+						},
+						{
+							"type": "text",
+							"title": "Phone",
+							"width": "30%",
+							"attr": "phone",
+							"filter": false,
+							"sort": false,
+							"default": "",
+							"placeholder": "Enter phone number"
+						},
+						{
+							"type": "text",
+							"title": "Devices",
+							"width": "40%",
+							"attr": "devices",
+							"filter": false,
+							"sort": false,
+							"default": "",
+							"placeholder": "Enter devices (comma-separated)"
+						}
+					]
+				}
+			}
+		},
+		"devicesTab": {
+			"type": "panel",
+			"label": "Devices",
+			"items": {
+				"devices": {
+					"type": "table",
+					"newLine": true,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12,
+					"label": "Devices",
+					"uniqueColumns": [ "name" ],
+					"items": [
+						{
+							"type": "text",
+							"title": "Name",
+							"width": "30%",
+							"attr": "name",
+							"filter": false,
+							"sort": false,
+							"default": "",
+							"placeholder": "Enter device name"
+						},
+						{
+							"type": "text",
+							"title": "Object",
+							"width": "30%",
+							"attr": "object",
+							"filter": false,
+							"sort": false,
+							"default": "",
+							"placeholder": "Enter object ID"
+						},
+						{
+							"type": "text",
+							"title": "DTMF Command",
+							"width": "40%",
+							"attr": "dtmfCommand",
+							"filter": false,
+							"sort": false,
+							"default": "",
+							"placeholder": "Enter DTMF command"
+						}
+					]
+				}
+			}
+		}
+	}
+}

@@ -3,30 +3,107 @@
     "name": "dtmf",
     "version": "0.0.1",
     "title": "DTMF Adapter",
-    "desc": "Adapter for DTMF control",
+    "desc": "Adapter for DTMF control with modem settings, users, and devices.",
+    "authors": [
+      "Your Name <your.email@example.com>"
+    ],
+    "keywords": [
+      "dtmf",
+      "modem",
+      "users",
+      "devices",
+      "ioBroker"
+    ],
+    "licenseInformation": {
+      "license": "MIT",
+      "type": "free"
+    },
     "platform": "Javascript/Node.js",
-    "mode": "daemon",
     "icon": "dtmf.png",
     "enabled": true,
-    "keywords": [ "dtmf", "modem" ],
-    "type": "communication"
+    "extIcon": "https://raw.githubusercontent.com/your-repo/ioBroker.dtmf/master/admin/dtmf.png",
+    "readme": "https://github.com/your-repo/ioBroker.dtmf/blob/master/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "communication",
+    "connectionType": "local",
+    "dataSource": "poll",
+    "adminUI": {
+      "config": "json"
+    },
+    "compact": true,
+    "messagebox": true,
+    "dependencies": [
+      {
+        "js-controller": ">=5.0.19"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=6.0"
+      }
+    ],
+    "tier": 3
   },
   "native": {
-    "modemPort": {
-      "type": "string",
-      "default": "/dev/ttyUSB0"
+    "modemPort": "/dev/ttyUSB0",
+    "modemBaudRate": 9600,
+    "users": [],
+    "devices": []
+  },
+  "encryptedNative": [],
+  "protectedNative": [],
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "modemSettings",
+      "type": "channel",
+      "common": {
+        "name": "Modem Settings"
+      },
+      "native": {}
     },
-    "modemBaudRate": {
-      "type": "number",
-      "default": 9600
+    {
+      "_id": "modemSettings.port",
+      "type": "state",
+      "common": {
+        "name": "Modem Port",
+        "type": "string",
+        "role": "info",
+        "read": true,
+        "write": true,
+        "def": "/dev/ttyUSB0"
+      },
+      "native": {}
     },
-    "users": {
-      "type": "array",
-      "default": []
+    {
+      "_id": "modemSettings.baudRate",
+      "type": "state",
+      "common": {
+        "name": "Modem Baud Rate",
+        "type": "number",
+        "role": "info",
+        "read": true,
+        "write": true,
+        "def": 9600
+      },
+      "native": {}
     },
-    "devices": {
-      "type": "array",
-      "default": []
+    {
+      "_id": "users",
+      "type": "channel",
+      "common": {
+        "name": "Users"
+      },
+      "native": {}
+    },
+    {
+      "_id": "devices",
+      "type": "channel",
+      "common": {
+        "name": "Devices"
+      },
+      "native": {}
     }
-  }
+  ]
 }
