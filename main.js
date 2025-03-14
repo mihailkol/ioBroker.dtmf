@@ -1,112 +1,86 @@
-/**
- *
- *      ioBroker DTMF Modem Adapter
- *
- *      (c) 2024 Your Name <your.email@example.com>
- *
- *      MIT License
- *
- */
 'use strict';
 
-const { Adapter } = require('@iobroker/adapter-core'); // Get common adapter utils
-const SerialPort = require('serialport'); // For modem communication
-const Readline = require('@serialport/parser-readline'); // For parsing modem responses
+const utils = require('@iobroker/adapter-core');
 
-const adapterName = require('./package.json').name.split('.').pop();
-let adapter;
+class Dtmf extends utils.Adapter {
 
-let modemPort;
-let parser;
-let isStopping = false;
+    constructor(options) {
+        super(options);
+        this.on('ready', this.onReady.bind(this));
+        this.on('objectChange', this.onObjectChange.bind(this));
+        this.on('stateChange', this.onStateChange.bind(this));
+    }
 
-function startAdapter(options) {
-    options = options || {};
-    Object.assign(options, { name: adapterName });
+    async onReady() {
+        // Создаем объекты для настроек модема
+        await this.setObjectNotExistsAsync('modemSettings', {
+            type: 'device',
+            common: {
+                name: 'Modem Settings',
+                role: 'info'
+            },
+            native: {}
+        });
 
-    adapter = new Adapter(options);
+        await this.setObjectNotExistsAsync('modemSettings.port', {
+            type: 'state',
+            common: {
+                name: 'Modem Port',
+                type: 'string',
+                role: 'info',
+                def: '/dev/ttyUSB0',
+                read: true,
+                write: true
+            },
+            native: {}
+        });
 
-    adapter.on('message', obj => obj?.command && processMessage(obj));
+        await this.setObjectNotExistsAsync('modemSettings.baudRate', {
+            type: 'state',
+            common: {
+                name: 'Modem Baud Rate',
+                type: 'number',
+                role: 'info',
+                def: 9600,
+                read: true,
+                write: true
+            },
+            native: {}
+        });
 
-    adapter.on('ready', () => main(adapter));
+        // Создаем объекты для пользователей и устройств
+        await this.setObjectNotExistsAsync('users', {
+            type: 'folder',
+            common: {
+                name: 'Users',
+                role: 'info'
+            },
+            native: {}
+        });
 
-    adapter.on('unload', () => {
-        isStopping = true;
-        if (modemPort) {
-            modemPort.close();
-            modemPort = null;
-        }
-    });
+        await this.setObjectNotExistsAsync('devices', {
+            type: 'folder',
+            common: {
+                name: 'Devices',
+                role: 'info'
+            },
+            native: {}
+        });
 
-    return adapter;
-}
+        this.log.info('Adapter initialized');
+    }
 
-async function processMessage(obj) {
-    switch (obj.command) {
-        case 'sendDtmf': {
-            const { command } = obj.message;
-            if (command && modemPort) {
-                try {
-                    modemPort.write(command + '\r\n'); // Send DTMF command to modem
-                    adapter.log.info(`DTMF command sent: ${command}`);
-                    adapter.sendTo(obj.from, obj.command, { success: true }, obj.callback);
-                } catch (error) {
-                    adapter.log.error(`Failed to send DTMF command: ${error}`);
-                    adapter.sendTo(obj.from, obj.command, { success: false, error: error.message }, obj.callback);
-                }
-            } else {
-                adapter.sendTo(obj.from, obj.command, { success: false, error: 'Modem not connected' }, obj.callback);
-            }
-            break;
-        }
+    onObjectChange(id, obj) {
+        // Обработка изменений объектов
+    }
+
+    onStateChange(id, state) {
+        // Обработка изменений состояний
     }
 }
 
-async function connectModem() {
-    const { modemPort: port, baudRate } = adapter.config;
-
-    if (!port || !baudRate) {
-        adapter.log.error('Modem port or baud rate not configured');
-        return;
-    }
-
-    try {
-        modemPort = new SerialPort(port, { baudRate: parseInt(baudRate, 10) });
-        parser = modemPort.pipe(new Readline({ delimiter: '\r\n' }));
-
-        modemPort.on('open', () => {
-            adapter.log.info(`Modem connected on port ${port}`);
-        });
-
-        modemPort.on('error', error => {
-            adapter.log.error(`Modem error: ${error}`);
-            modemPort = null;
-        });
-
-        parser.on('data', data => {
-            adapter.log.debug(`Modem response: ${data}`);
-            // Handle modem responses if needed
-        });
-    } catch (error) {
-        adapter.log.error(`Failed to connect to modem: ${error}`);
-        modemPort = null;
-    }
-}
-
-async function main(adapter) {
-    // Initialize modem connection
-    await connectModem();
-
-    // Subscribe to states if needed
-    await adapter.subscribeStates('*');
-
-    adapter.log.info('DTMF Modem adapter started');
-}
-
-// If started as allInOne/compact mode => return function to create instance
-if (module && module.parent) {
-    module.exports = startAdapter;
+if (module.parent) {
+    module.exports = (options) => new Dtmf(options);
 } else {
-    // or start the instance directly
-    startAdapter();
+    new Dtmf();
 }

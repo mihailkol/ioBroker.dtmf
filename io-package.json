@@ -1,184 +1,29 @@
 {
   "common": {
-    "name": "dtmf-modem",
-    "version": "1.0.0",
-    "news": {
-      }
-    },
-    "titleLang": {
-      "en": "DTMF Modem",
-      "de": "DTMF Modem",
-      "ru": "DTMF Modem",
-      "pt": "DTMF Modem",
-      "nl": "DTMF Modem",
-      "fr": "DTMF Modem",
-      "it": "DTMF Modem",
-      "es": "DTMF Modem",
-      "pl": "DTMF Modem",
-      "uk": "DTMF Modem",
-      "zh-cn": "DTMF Modem"
-    },
+    "name": "dtmf",
+    "version": "0.0.1",
+    "title": "DTMF Adapter",
     "desc": {
-      "en": "This adapter allows controlling a modem using DTMF signals.",
-      "de": "Dieser Adapter ermöglicht die Steuerung eines Modems über DTMF-Signale.",
-      "ru": "Этот адаптер позволяет управлять модемом с использованием DTMF сигналов.",
-      "pt": "Este adaptador permite controlar um modem usando sinais DTMF.",
-      "nl": "Deze adapter maakt het mogelijk om een modem te besturen met DTMF-signalen.",
-      "fr": "Cet adaptateur permet de contrôler un modem à l'aide de signaux DTMF.",
-      "it": "Questo adattatore consente di controllare un modem utilizzando segnali DTMF.",
-      "es": "Este adaptador permite controlar un módem mediante señales DTMF.",
-      "pl": "Ten adapter umożliwia sterowanie modemem za pomocą sygnałów DTMF.",
-      "uk": "Цей адаптер дозволяє керувати модемом за допомогою DTMF сигналів.",
-      "zh-cn": "该适配器允许使用 DTMF 信号控制调制解调器。"
+      "en": "Adapter for DTMF control",
+      "de": "Adapter für DTMF-Steuerung"
     },
-    "authors": [
-      "Mikhail KOlesnikov <m89139158466@gmail.com>"
-    ],
     "platform": "Javascript/Node.js",
     "mode": "daemon",
-    "compact": true,
-    "readme": "https://github.com/ioBroker/ioBroker.ping/blob/master/README.md",
-    "loglevel": "info",
-    "icon": "dtmf-modem.png",
-    "messagebox": true,
+    "icon": "dtmf.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.dtmf/master/admin/dtmf.png",
     "keywords": [
       "dtmf",
-      "modem",
-      "control",
-      "home automation"
+      "modem"
     ],
-    "adminUI": {
-      "config": "json"
-    },
-    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.ping/master/admin/dtmf-modem.png",
-    "type": "network",
-    "licenseInformation": {
-      "type": "free",
-      "license": "MIT"
-    },
-    "dependencies": [
-      {
-        "js-controller": ">=5.0.19"
-      }
-    ],
-    "connectionType": "local",
-    "dataSource": "poll",
-    "tier": 2
+    "readme": "https://github.com/ioBroker/ioBroker.dtmf/blob/master/README.md",
+    "loglevel": "info",
+    "type": "communication"
   },
   "native": {
-    "devices": [],
-    "users":[],
     "modemPort": "/dev/ttyUSB0",
-    "baudRate": 9600,
-    "dtmfTimeout": 5000
-  },
-  "notifications": [
-  {
-    "scope": "dtmf",
-    "name": {
-      "en": "DTMF Command",
-      "de": "DTMF-Befehl",
-      "ru": "DTMF Команда",
-      "pt": "Comando DTMF",
-      "nl": "DTMF-opdracht",
-      "fr": "Commande DTMF",
-      "it": "Comando DTMF",
-      "es": "Comando DTMF",
-      "pl": "Polecenie DTMF",
-      "uk": "DTMF Команда",
-      "zh-cn": "DTMF 命令"
-    },
-    "description": {
-      "en": "These notifications inform about executed DTMF commands.",
-      "de": "Diese Benachrichtigungen informieren über ausgeführte DTMF-Befehle.",
-      "ru": "Эти уведомления информируют о выполненных DTMF командах.",
-      "pt": "Essas notificações informam sobre comandos DTMF executados.",
-      "nl": "Deze meldingen informeren over uitgevoerde DTMF-opdrachten.",
-      "fr": "Ces notifications informent sur les commandes DTMF exécutées.",
-      "it": "Queste notifiche informano sui comandi DTMF eseguiti.",
-      "es": "Estas notificaciones informan sobre los comandos DTMF ejecutados.",
-      "pl": "Te powiadomienia informują o wykonanych poleceniach DTMF.",
-      "uk": "Ці сповіщення інформують про виконані DTMF команди.",
-      "zh-cn": "这些通知通知您执行的 DTMF 命令。"
-    },
-    "categories": [
-      {
-        "category": "dtmfCommands",
-        "name": {
-          "en": "DTMF Commands",
-          "de": "DTMF-Befehle",
-          "ru": "DTMF Команды",
-          "pt": "Comandos DTMF",
-          "nl": "DTMF-opdrachten",
-          "fr": "Commandes DTMF",
-          "it": "Comandi DTMF",
-          "es": "Comandos DTMF",
-          "pl": "Polecenia DTMF",
-          "uk": "DTMF Команди",
-          "zh-cn": "DTMF 命令"
-        },
-        "severity": "notify",
-        "description": {
-          "en": "DTMF commands executed by the modem.",
-          "de": "DTMF-Befehle, die vom Modem ausgeführt wurden.",
-          "ru": "DTMF команды, выполненные модемом.",
-          "pt": "Comandos DTMF executados pelo modem.",
-          "nl": "DTMF-opdrachten uitgevoerd door de modem.",
-          "fr": "Commandes DTMF exécutées par le modem.",
-          "it": "Comandi DTMF eseguiti dal modem.",
-          "es": "Comandos DTMF ejecutados por el módem.",
-          "pl": "Polecenia DTMF wykonane przez modem.",
-          "uk": "DTMF команди, виконані модемом.",
-          "zh-cn": "调制解调器执行的 DTMF 命令。"
-        },
-        "regex": [],
-        "limit": 1
-      }
-    ]
+    "modemBaudRate": 9600,
+    "users": [],
+    "devices": []
   }
-  ],
-"objects": [
-  {
-    "_id": "modem",
-    "type": "channel",
-    "common": {
-      "name": "Modem",
-      "desc": "Channel for modem control"
-    }
-  },
-  {
-    "_id": "modem.dtmf",
-    "type": "state",
-    "common": {
-      "name": "DTMF Command",
-      "type": "string",
-      "role": "state",
-      "read": true,
-      "write": true,
-      "desc": "Send DTMF commands to the modem"
-    }
-  }
-]
-  "instanceObjects": [
-    {
-      "_id": "modem",
-      "type": "channel",
-      "common": {
-        "name": "Modem",
-        "desc": "Channel for modem control"
-      }
-    },
-    {
-      "_id": "modem.dtmf",
-      "type": "state",
-      "common": {
-        "name": "DTMF Command",
-        "type": "string",
-        "role": "state",
-        "read": true,
-        "write": true,
-        "desc": "Send DTMF commands to the modem"
-      }
-    }
-  ]
 }

@@ -1,126 +1,61 @@
+<!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="../../lib/css/themes/jquery-ui/redmond/jquery-ui.min.css"/>
-    <script type="text/javascript" src="../../lib/js/jquery-1.11.1.min.js"></script>
-    <script type="text/javascript" src="../../socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="../../lib/js/jquery-ui-1.10.3.full.min.js"></script>
-
-    <link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
-    <script type="text/javascript" src="../../js/translate.js"></script>
-    <script type="text/javascript" src="../../js/adapter-settings.js"></script>
-    <script type="text/javascript" src="words.js"></script>
-
-    <script type="text/javascript">
-        // Функция для загрузки настроек
-        function load(settings, onChange) {
-            if (!settings) return;
-
-            // Установка значений полей
-            setValue('modemPort', settings.modemPort || '/dev/ttyUSB0', onChange);
-            setValue('baudRate', settings.baudRate || 9600, onChange);
-            setValue('dtmfTimeout', settings.dtmfTimeout || 5000, onChange);
-
-            onChange(false);
-        }
-
-        // Функция для сохранения настроек
-        function save(callback) {
-            var obj = {
-                modemPort: $('#modemPort').val(),
-                baudRate: parseInt($('#baudRate').val(), 10),
-                dtmfTimeout: parseInt($('#dtmfTimeout').val(), 10)
-            };
-            callback(obj);
-        }
-
-        // Функция для установки значений в поля
-        function setValue(id, value, onChange) {
-            var $value = $('#' + id + '.value');
-            if ($value.attr('type') === 'checkbox') {
-                $value.prop('checked', value).change(function () {
-                    onChange();
-                });
-            } else {
-                $value.val(value).change(function () {
-                    onChange();
-                }).keyup(function() {
-                    // Проверка, что введены только числа
-                    if ($(this).hasClass('number')) {
-                        var val = $(this).val();
-                        if (val) {
-                            var newVal = '';
-                            for (var i = 0; i < val.length; i++) {
-                                if (val[i] >= '0' && val[i] <= '9') {
-                                    newVal += val[i];
-                                }
-                            }
-                            if (val != newVal) $(this).val(newVal);
-                        }
-                    }
-                    onChange();
-                });
-            }
-        }
-
-        // Функция для отправки DTMF команды
-        function sendDtmfCommand() {
-            const dtmfCommand = $('#dtmfCommand').val();
-            if (dtmfCommand) {
-                // Отправляем команду в адаптер
-                sendTo('dtmf-modem', 'sendDtmf', { command: dtmfCommand }, function (response) {
-                    console.log('DTMF command sent:', response);
-                    if (response && response.success) {
-                        alert('DTMF command sent successfully!');
-                    } else {
-                        alert('Failed to send DTMF command.');
-                    }
-                });
-            } else {
-                alert('Please enter a DTMF command.');
-            }
-        }
-
-        // Инициализация кнопки отправки
-        $(document).ready(function () {
-            $('#sendDtmf').on('click', sendDtmfCommand);
-        });
-    </script>
+    <meta charset="utf-8">
+    <title>DTMF Adapter Settings</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<!-- Контейнер для настроек адаптера -->
-<div id="adapter-container">
-    <table>
-        <tr>
-            <td><img src="dtmf-modem.png" width="64px" height="64px"></td>
-            <td style="padding-top: 20px;padding-left: 10px"><h3 class="translate">DTMF Modem Settings</h3></td>
-        </tr>
-    </table>
-
-    <h4 class="translate">Modem Settings</h4>
-    <table>
-        <tr>
-            <td><label class="translate" for="modemPort">Modem Port:</label></td>
-            <td class="admin-icon"></td>
-            <td><input class="value" id="modemPort" size="20" /></td>
-        </tr>
-        <tr>
-            <td><label class="translate" for="baudRate">Baud Rate:</label></td>
-            <td class="admin-icon"></td>
-            <td><input class="value number" id="baudRate" size="6" /></td>
-        </tr>
-        <tr>
-            <td><label class="translate" for="dtmfTimeout">DTMF Timeout [ms]:</label></td>
-            <td class="admin-icon"></td>
-            <td><input class="value number" id="dtmfTimeout" size="6" /></td>
-        </tr>
-    </table>
-
-    <h4 class="translate">DTMF Commands</h4>
-    <div>
-        <label class="translate" for="dtmfCommand">Enter DTMF Command:</label>
-        <input class="value" id="dtmfCommand" size="20" />
-        <button class="translate" id="sendDtmf">Send</button>
+    <h1>DTMF Adapter Settings</h1>
+    <div id="tabs">
+        <button onclick="openTab('modemSettings')">Modem Settings</button>
+        <button onclick="openTab('userSettings')">User Settings</button>
+        <button onclick="openTab('deviceSettings')">Device Settings</button>
     </div>
-</div>
+
+    <div id="modemSettings" class="tab">
+        <h2>Modem Settings</h2>
+        <label for="modemPort">Port:</label>
+        <input type="text" id="modemPort" value="/dev/ttyUSB0">
+        <label for="modemBaudRate">Baud Rate:</label>
+        <input type="number" id="modemBaudRate" value="9600">
+        <button onclick="saveModemSettings()">Save</button>
+    </div>
+
+    <div id="userSettings" class="tab" style="display:none;">
+        <h2>User Settings</h2>
+        <table id="userTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Devices</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button onclick="addUserRow()">Add Row</button>
+        <button onclick="saveUserSettings()">Save</button>
+    </div>
+
+    <div id="deviceSettings" class="tab" style="display:none;">
+        <h2>Device Settings</h2>
+        <table id="deviceTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Object</th>
+                    <th>DTMF Command</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button onclick="addDeviceRow()">Add Row</button>
+        <button onclick="saveDeviceSettings()">Save</button>
+    </div>
+
+    <script src="js/settings.js"></script>
 </body>
 </html>
