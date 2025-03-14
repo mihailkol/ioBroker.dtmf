@@ -12,6 +12,17 @@ class Dtmf extends utils.Adapter {
     }
 
     async onReady() {
+        // Проверяем, что конфигурация загружена
+        if (!this.config) {
+            this.config = {}; // Инициализируем пустую конфигурацию
+        }
+
+        // Устанавливаем значения по умолчанию, если конфигурация не задана
+        this.config.modemPort = this.config.modemPort || "/dev/ttyUSB0";
+        this.config.modemBaudRate = this.config.modemBaudRate || 9600;
+        this.config.users = this.config.users || [];
+        this.config.devices = this.config.devices || [];
+
         // Создаем объекты для настроек модема
         await this.setObjectNotExistsAsync('modemSettings', {
             type: 'device',
@@ -28,7 +39,7 @@ class Dtmf extends utils.Adapter {
                 name: 'Modem Port',
                 type: 'string',
                 role: 'info',
-                def: '/dev/ttyUSB0',
+                def: this.config.modemPort, // Используем значение из конфигурации
                 read: true,
                 write: true
             },
@@ -41,7 +52,7 @@ class Dtmf extends utils.Adapter {
                 name: 'Modem Baud Rate',
                 type: 'number',
                 role: 'info',
-                def: 9600,
+                def: this.config.modemBaudRate, // Используем значение из конфигурации
                 read: true,
                 write: true
             },
@@ -67,7 +78,7 @@ class Dtmf extends utils.Adapter {
             native: {}
         });
 
-        this.log.info('Adapter initialized');
+        this.log.info('Adapter initialized and objects created');
     }
 
     onObjectChange(id, obj) {

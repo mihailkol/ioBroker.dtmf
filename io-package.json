@@ -14,13 +14,11 @@
   "native": {
     "modemPort": {
       "type": "string",
-      "default": "/dev/ttyUSB0",
-      "required": true
+      "default": "/dev/ttyUSB0"
     },
     "modemBaudRate": {
       "type": "number",
-      "default": 9600,
-      "required": true
+      "default": 9600
     },
     "users": {
       "type": "array",
@@ -31,4 +29,3 @@
       "default": []
     }
   }
-}
