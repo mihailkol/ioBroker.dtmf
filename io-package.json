@@ -1,6 +1,5 @@
 {
   "common": {
-    "main": "main.js",
     "name": "dtmf",
     "version": "0.0.1",
     "title": "DTMF Adapter",
