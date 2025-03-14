@@ -3,27 +3,32 @@
     "name": "dtmf",
     "version": "0.0.1",
     "title": "DTMF Adapter",
-    "desc": {
-      "en": "Adapter for DTMF control",
-      "de": "Adapter für DTMF-Steuerung"
-    },
+    "desc": "Adapter for DTMF control",
     "platform": "Javascript/Node.js",
     "mode": "daemon",
     "icon": "dtmf.png",
     "enabled": true,
-    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.dtmf/master/admin/dtmf.png",
-    "keywords": [
-      "dtmf",
-      "modem"
-    ],
-    "readme": "https://github.com/ioBroker/ioBroker.dtmf/blob/master/README.md",
-    "loglevel": "info",
+    "keywords": [ "dtmf", "modem" ],
     "type": "communication"
   },
   "native": {
-    "modemPort": "/dev/ttyUSB0",
-    "modemBaudRate": 9600,
-    "users": [],
-    "devices": []
+    "modemPort": {
+      "type": "string",
+      "default": "/dev/ttyUSB0",
+      "required": true
+    },
+    "modemBaudRate": {
+      "type": "number",
+      "default": 9600,
+      "required": true
+    },
+    "users": {
+      "type": "array",
+      "default": []
+    },
+    "devices": {
+      "type": "array",
+      "default": []
+    }
   }
 }
