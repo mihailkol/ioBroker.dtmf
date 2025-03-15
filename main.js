@@ -113,7 +113,35 @@ class DtmfAdapter extends utils.Adapter {
                     await this.saveConfig();
                     this.log.info('Settings saved');
 
-                    // Обновляем объекты настроек модема
+                    // Отладочное сообщение
+                    this.log.debug(`Modem Port: ${this.config.modemPort}, Baud Rate: ${this.config.modemBaudRate}`);
+
+                    // Принудительно обновляем объекты настроек модема
+                    await this.setObjectNotExistsAsync('modemSettings.port', {
+                        type: 'state',
+                        common: {
+                            name: 'Modem Port',
+                            type: 'string',
+                            role: 'info',
+                            read: true,
+                            write: true,
+                        },
+                        native: {},
+                    });
+
+                    await this.setObjectNotExistsAsync('modemSettings.baudRate', {
+                        type: 'state',
+                        common: {
+                            name: 'Modem Baud Rate',
+                            type: 'number',
+                            role: 'info',
+                            read: true,
+                            write: true,
+                        },
+                        native: {},
+                    });
+
+                    // Обновляем состояния
                     await this.setStateAsync('modemSettings.port', this.config.modemPort, true);
                     await this.setStateAsync('modemSettings.baudRate', this.config.modemBaudRate, true);
 
