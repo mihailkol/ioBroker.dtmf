@@ -113,35 +113,7 @@ class DtmfAdapter extends utils.Adapter {
                     await this.saveConfig();
                     this.log.info('Settings saved');
 
-                    // Отладочное сообщение
-                    this.log.debug(`Modem Port: ${this.config.modemPort}, Baud Rate: ${this.config.modemBaudRate}`);
-
                     // Обновляем объекты настроек модема
-                    await this.extendObjectAsync('modemSettings.port', {
-                        type: 'state',
-                        common: {
-                            name: 'Modem Port',
-                            type: 'string',
-                            role: 'info',
-                            read: true,
-                            write: true,
-                        },
-                        native: {},
-                    });
-
-                    await this.extendObjectAsync('modemSettings.baudRate', {
-                        type: 'state',
-                        common: {
-                            name: 'Modem Baud Rate',
-                            type: 'number',
-                            role: 'info',
-                            read: true,
-                            write: true,
-                        },
-                        native: {},
-                    });
-
-                    // Обновляем состояния
                     await this.setStateAsync('modemSettings.port', this.config.modemPort, true);
                     await this.setStateAsync('modemSettings.baudRate', this.config.modemBaudRate, true);
 
@@ -161,6 +133,27 @@ class DtmfAdapter extends utils.Adapter {
                     this.log.warn(`Unknown command: ${obj.command}`);
                     break;
             }
+        }
+    }
+
+    async onStateChange(id, state) {
+        if (!state || state.ack) {
+            return; // Игнорируем подтвержденные состояния
+        }
+
+        this.log.debug(`State ${id} changed to ${state.val}`);
+
+        // Обработка изменений настроек модема
+        if (id === `${this.namespace}.modemSettings.port`) {
+            this.config.modemPort = state.val;
+            await this.saveConfig();
+            this.log.info('Modem Port updated in config');
+        }
+
+        if (id === `${this.namespace}.modemSettings.baudRate`) {
+            this.config.modemBaudRate = state.val;
+            await this.saveConfig();
+            this.log.info('Modem Baud Rate updated in config');
         }
     }
 
