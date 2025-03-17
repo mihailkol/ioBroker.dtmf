@@ -1,5 +1,4 @@
-﻿//1.0
-"use strict";
+﻿"use strict";
 
 const utils = require("@iobroker/adapter-core");
 
@@ -118,6 +117,8 @@ class DtmfAdapter extends utils.Adapter {
                     this.config.modemBaudRate = obj.message.modemBaudRate;
                     this.config.users = obj.message.users || [];
                     this.config.devices = obj.message.devices || [];
+
+                    // Сохраняем конфигурацию
                     await this.saveConfig();
                     this.log.info('Settings saved');
 
