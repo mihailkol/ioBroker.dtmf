@@ -1,4 +1,5 @@
-﻿"use strict";
+﻿//1.0
+"use strict";
 
 const utils = require("@iobroker/adapter-core");
 
@@ -127,6 +128,10 @@ class DtmfAdapter extends utils.Adapter {
                     // Создаем/обновляем объекты для пользователей и устройств
                     await this.updateUsersAndDevices();
 
+                    // Обновляем объекты настроек модема
+                    await this.setStateAsync('modemSettings.port', this.config.modemPort, true);
+                    await this.setStateAsync('modemSettings.baudRate', this.config.modemBaudRate, true);
+
                     this.sendTo(obj.from, obj.command, { success: true }, obj.callback);
                     break;
 
@@ -141,14 +146,18 @@ class DtmfAdapter extends utils.Adapter {
      * Удаление старых объектов пользователей или устройств
      */
     async deleteOldObjects(folder) {
-        const objects = await this.getObjectListAsync({
-            startkey: `${this.namespace}.${folder}.`,
-            endkey: `${this.namespace}.${folder}.\u9999`,
-        });
+        try {
+            const objects = await this.getObjectListAsync({
+                startkey: `${this.namespace}.${folder}.`,
+                endkey: `${this.namespace}.${folder}.\u9999`,
+            });
 
-        for (const obj of objects.rows) {
-            await this.delObjectAsync(obj.id);
-            this.log.debug(`Deleted old object: ${obj.id}`);
+            for (const obj of objects.rows) {
+                await this.delObjectAsync(obj.id);
+                this.log.debug(`Deleted old object: ${obj.id}`);
+            }
+        } catch (err) {
+            this.log.error(`Error deleting old objects: ${err}`);
         }
     }
 
