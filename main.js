@@ -84,13 +84,13 @@ class DtmfAdapter extends utils.Adapter {
 
         // Обработка изменений настроек модема
         if (id === `${this.namespace}.modemSettings.port`) {
-            this.config.modemPort = state.val;
+            this.config.modemPort = state.val; // Обновляем конфигурацию
             await this.saveConfig();
             this.log.info('Modem Port updated in config');
         }
 
         if (id === `${this.namespace}.modemSettings.baudRate`) {
-            this.config.modemBaudRate = state.val;
+            this.config.modemBaudRate = state.val; // Обновляем конфигурацию
             await this.saveConfig();
             this.log.info('Modem Baud Rate updated in config');
         }
