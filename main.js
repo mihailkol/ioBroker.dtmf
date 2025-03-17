@@ -105,10 +105,14 @@ class DtmfAdapter extends utils.Adapter {
 
             switch (obj.command) {
                 case 'getSettings':
+                    // Загружаем текущие значения объектов
+                    const modemPortState = await this.getStateAsync("modemSettings.port");
+                    const modemBaudRateState = await this.getStateAsync("modemSettings.baudRate");
+
                     // Отправляем текущие настройки в интерфейс администрирования
                     const settings = {
-                        modemPort: this.config.modemPort,
-                        modemBaudRate: this.config.modemBaudRate,
+                        modemPort: modemPortState?.val || this.config.modemPort, // Используем текущее значение объекта
+                        modemBaudRate: modemBaudRateState?.val || this.config.modemBaudRate, // Используем текущее значение объекта
                         users: this.config.users || [],
                         devices: this.config.devices || [],
                     };
