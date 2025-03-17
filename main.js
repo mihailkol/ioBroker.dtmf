@@ -62,27 +62,7 @@ class DtmfAdapter extends utils.Adapter {
             native: {},
         });
 
-        // Создаем или обновляем объекты для пользователей
-        await this.extendObject("users", {
-            type: "folder",
-            common: {
-                name: "Users",
-                role: "info",
-            },
-            native: {},
-        });
-
-        // Создаем или обновляем объекты для устройств
-        await this.extendObject("devices", {
-            type: "folder",
-            common: {
-                name: "Devices",
-                role: "info",
-            },
-            native: {},
-        });
-
-        // Обновляем объекты пользователей и устройств
+        // Создаем или обновляем объекты для пользователей и устройств
         await this.updateUsersAndDevices();
 
         this.log.info('Adapter ready and objects created/updated');
@@ -120,15 +100,29 @@ class DtmfAdapter extends utils.Adapter {
             this.log.debug(`Received message: ${JSON.stringify(obj)}`);
 
             switch (obj.command) {
+                case 'getSettings':
+                    // Отправляем текущие настройки в интерфейс администрирования
+                    const settings = {
+                        modemPort: this.config.modemPort,
+                        modemBaudRate: this.config.modemBaudRate,
+                        users: this.config.users || [],
+                        devices: this.config.devices || [],
+                    };
+                    this.sendTo(obj.from, obj.command, settings, obj.callback);
+                    break;
+
                 case 'saveSettings':
                     // Сохранение настроек
-                    this.config = obj.message;
+                    this.config.modemPort = obj.message.modemPort;
+                    this.config.modemBaudRate = obj.message.modemBaudRate;
+                    this.config.users = obj.message.users || [];
+                    this.config.devices = obj.message.devices || [];
                     await this.saveConfig();
                     this.log.info('Settings saved');
 
-                    // Обновляем объекты настроек модема
-                    await this.setStateAsync('modemSettings.port', this.config.modemPort, true);
-                    await this.setStateAsync('modemSettings.baudRate', this.config.modemBaudRate, true);
+                    // Удаляем старые объекты пользователей и устройств
+                    await this.deleteOldObjects("users");
+                    await this.deleteOldObjects("devices");
 
                     // Создаем/обновляем объекты для пользователей и устройств
                     await this.updateUsersAndDevices();
@@ -136,16 +130,25 @@ class DtmfAdapter extends utils.Adapter {
                     this.sendTo(obj.from, obj.command, { success: true }, obj.callback);
                     break;
 
-                case 'closeSettings':
-                    // Закрытие настроек
-                    this.log.info('Settings closed');
-                    this.sendTo(obj.from, obj.command, { success: true }, obj.callback);
-                    break;
-
                 default:
                     this.log.warn(`Unknown command: ${obj.command}`);
                     break;
             }
+        }
+    }
+
+    /**
+     * Удаление старых объектов пользователей или устройств
+     */
+    async deleteOldObjects(folder) {
+        const objects = await this.getObjectListAsync({
+            startkey: `${this.namespace}.${folder}.`,
+            endkey: `${this.namespace}.${folder}.\u9999`,
+        });
+
+        for (const obj of objects.rows) {
+            await this.delObjectAsync(obj.id);
+            this.log.debug(`Deleted old object: ${obj.id}`);
         }
     }
 
