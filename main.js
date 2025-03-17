@@ -42,7 +42,7 @@ class DtmfAdapter extends utils.Adapter {
                 name: "Modem Port",
                 type: "string",
                 role: "info",
-                def: this.config.modemPort || "/dev/ttyUSB0",
+                def: this.config.modemPort || "/dev/ttyUSB0", // Значение по умолчанию
                 read: true,
                 write: true,
             },
@@ -55,12 +55,16 @@ class DtmfAdapter extends utils.Adapter {
                 name: "Modem Baud Rate",
                 type: "number",
                 role: "info",
-                def: this.config.modemBaudRate || 9600,
+                def: this.config.modemBaudRate || 9600, // Значение по умолчанию
                 read: true,
                 write: true,
             },
             native: {},
         });
+
+        // Устанавливаем текущие значения состояний
+        await this.setStateAsync("modemSettings.port", this.config.modemPort || "/dev/ttyUSB0", true);
+        await this.setStateAsync("modemSettings.baudRate", this.config.modemBaudRate || 9600, true);
 
         // Создаем или обновляем объекты для пользователей и устройств
         await this.updateUsersAndDevices();
