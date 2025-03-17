@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "iobroker.dtmf",
   "version": "0.0.1",
   "description": "Adapter for DTMF control with modem settings, users, and devices.",
