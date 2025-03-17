@@ -5,7 +5,7 @@
     "title": "DTMF Adapter",
     "desc": "Adapter for DTMF control with modem settings, users, and devices.",
     "authors": [
-      "Your Name <your.email@example.com>"
+      "Mikhail Kolesnikov <m89139158466@gmail.com>"
     ],
     "keywords": [
       "dtmf",
@@ -21,7 +21,7 @@
     "platform": "Javascript/Node.js",
     "icon": "dtmf.png",
     "enabled": true,
-    "extIcon": "https://raw.githubusercontent.com/your-repo/ioBroker.dtmf/master/admin/dtmf.png",
+    "extIcon": "https://github.com/mihailkol/ioBroker.dtmf/blob/master/admin/dtmf.png",
     "readme": "https://github.com/your-repo/ioBroker.dtmf/blob/master/README.md",
     "loglevel": "info",
     "mode": "daemon",
@@ -55,40 +55,6 @@
   "protectedNative": [],
   "objects": [],
   "instanceObjects": [
-    {
-      "_id": "modemSettings",
-      "type": "channel",
-      "common": {
-        "name": "Modem Settings"
-      },
-      "native": {}
-    },
-    {
-      "_id": "modemSettings.port",
-      "type": "state",
-      "common": {
-        "name": "Modem Port",
-        "type": "string",
-        "role": "info",
-        "read": true,
-        "write": true,
-        "def": "/dev/ttyUSB0"
-      },
-      "native": {}
-    },
-    {
-      "_id": "modemSettings.baudRate",
-      "type": "state",
-      "common": {
-        "name": "Modem Baud Rate",
-        "type": "number",
-        "role": "info",
-        "read": true,
-        "write": true,
-        "def": 9600
-      },
-      "native": {}
-    },
     {
       "_id": "users",
       "type": "channel",
