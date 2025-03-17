@@ -27,47 +27,7 @@ class DtmfAdapter extends utils.Adapter {
         this.log.info("Adapter initialized");
 
         // Логируем текущую конфигурацию
-        this.log.info(`Current config onReady: ${JSON.stringify(this.config, null, 2)}`);
-
-        // Создаем или обновляем объекты для настроек модема
-        await this.extendObject("modemSettings", {
-            type: "device",
-            common: {
-                name: "Modem Settings",
-                role: "info",
-            },
-            native: {},
-        });
-
-        await this.extendObject("modemSettings.port", {
-            type: "state",
-            common: {
-                name: "Modem Port",
-                type: "string",
-                role: "info",
-                def: this.config.modemPort || "/dev/ttyUSB0", // Значение по умолчанию
-                read: true,
-                write: true,
-            },
-            native: {},
-        });
-
-        await this.extendObject("modemSettings.baudRate", {
-            type: "state",
-            common: {
-                name: "Modem Baud Rate",
-                type: "number",
-                role: "info",
-                def: this.config.modemBaudRate || 9600, // Значение по умолчанию
-                read: true,
-                write: true,
-            },
-            native: {},
-        });
-
-        // Устанавливаем текущие значения состояний
-        await this.setStateAsync("modemSettings.port", this.config.modemPort || "/dev/ttyUSB0", true);
-        await this.setStateAsync("modemSettings.baudRate", this.config.modemBaudRate || 9600, true);
+        this.log.info(`Current config: ${JSON.stringify(this.config, null, 2)}`);
 
         // Создаем или обновляем объекты для пользователей и устройств
         await this.updateUsersAndDevices();
@@ -84,21 +44,6 @@ class DtmfAdapter extends utils.Adapter {
         }
 
         this.log.debug(`State ${id} changed to ${state.val}`);
-
-        // Обработка изменений настроек модема
-        if (id === `${this.namespace}.modemSettings.port`) {
-            this.config.modemPort = state.val; // Обновляем конфигурацию
-            await this.saveConfig();
-            this.log.info('Modem Port updated in config');
-            this.log.info(`Updated config: ${JSON.stringify(this.config, null, 2)}`); // Логируем обновленную конфигурацию
-        }
-
-        if (id === `${this.namespace}.modemSettings.baudRate`) {
-            this.config.modemBaudRate = state.val; // Обновляем конфигурацию
-            await this.saveConfig();
-            this.log.info('Modem Baud Rate updated in config');
-            this.log.info(`Updated config: ${JSON.stringify(this.config, null, 2)}`); // Логируем обновленную конфигурацию
-        }
     }
 
     /**
@@ -110,48 +55,10 @@ class DtmfAdapter extends utils.Adapter {
 
             switch (obj.command) {
                 case 'getSettings':
-                    // Загружаем текущие значения объектов
-                    const modemPortState = await this.getStateAsync("modemSettings.port");
-                    const modemBaudRateState = await this.getStateAsync("modemSettings.baudRate");
-                    this.log.info(`Current config getSettings: ${JSON.stringify(this.config, null, 2)}`);
-
-                    // Если объекты не существуют, создаем их с текущими значениями из конфигурации
-                    if (!modemPortState) {
-                        await this.extendObject("modemSettings.port", {
-                            type: "state",
-                            common: {
-                                name: "Modem Port",
-                                type: "string",
-                                role: "info",
-                                def: this.config.modemPort || "/dev/ttyUSB0",
-                                read: true,
-                                write: true,
-                            },
-                            native: {},
-                        });
-                        await this.setStateAsync("modemSettings.port", this.config.modemPort || "/dev/ttyUSB0", true);
-                    }
-
-                    if (!modemBaudRateState) {
-                        await this.extendObject("modemSettings.baudRate", {
-                            type: "state",
-                            common: {
-                                name: "Modem Baud Rate",
-                                type: "number",
-                                role: "info",
-                                def: this.config.modemBaudRate || 9600,
-                                read: true,
-                                write: true,
-                            },
-                            native: {},
-                        });
-                        await this.setStateAsync("modemSettings.baudRate", this.config.modemBaudRate || 9600, true);
-                    }
-
                     // Отправляем текущие настройки в интерфейс администрирования
                     const settings = {
-                        modemPort: modemPortState?.val || this.config.modemPort, // Используем текущее значение объекта
-                        modemBaudRate: modemBaudRateState?.val || this.config.modemBaudRate, // Используем текущее значение объекта
+                        modemPort: this.config.modemPort,
+                        modemBaudRate: this.config.modemBaudRate,
                         users: this.config.users || [],
                         devices: this.config.devices || [],
                     };
@@ -169,19 +76,12 @@ class DtmfAdapter extends utils.Adapter {
                     await this.saveConfig();
                     this.log.info('Settings saved');
 
-                    // Логируем обновленную конфигурацию
-                    this.log.info(`Config after save: ${JSON.stringify(this.config, null, 2)}`);
-
                     // Удаляем старые объекты пользователей и устройств
                     await this.deleteOldObjects("users");
                     await this.deleteOldObjects("devices");
 
                     // Создаем/обновляем объекты для пользователей и устройств
                     await this.updateUsersAndDevices();
-
-                    // Обновляем объекты настроек модема
-                    await this.setStateAsync('modemSettings.port', this.config.modemPort, true);
-                    await this.setStateAsync('modemSettings.baudRate', this.config.modemBaudRate, true);
 
                     this.sendTo(obj.from, obj.command, { success: true }, obj.callback);
                     break;
