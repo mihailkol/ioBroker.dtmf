@@ -89,8 +89,8 @@ class DtmfAdapter extends utils.Adapter {
                     this.config.modemBaudRate = obj.message.modemBaudRate;
 
                     // Удаляем старые объекты пользователей и устройств
-                    await this.deleteOldObjects("users");
-                    await this.deleteOldObjects("devices");
+                    //await this.deleteOldObjects("users");
+                    //await this.deleteOldObjects("devices");
 
                     // Создаем/обновляем объекты для пользователей и устройств
                     await this.updateUsersAndDevices(obj.message.users, obj.message.devices);
@@ -107,7 +107,7 @@ class DtmfAdapter extends utils.Adapter {
 
     /**
      * Загрузка объектов из папки
-     */
+     
     async loadObjectsFromFolder(folder) {
         const objects = await this.getObjectListAsync({
             startkey: `${this.namespace}.${folder}.`,
