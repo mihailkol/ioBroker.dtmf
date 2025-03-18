@@ -1,4 +1,5 @@
-﻿"use strict";
+﻿
+"use strict";
 
 const utils = require("@iobroker/adapter-core");
 
