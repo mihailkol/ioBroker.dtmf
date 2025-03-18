@@ -55,12 +55,16 @@ class DtmfAdapter extends utils.Adapter {
 
             switch (obj.command) {
                 case 'getSettings':
+                    // Загружаем текущие объекты пользователей и устройств
+                    const users = await this.loadObjectsFromFolder("users");
+                    const devices = await this.loadObjectsFromFolder("devices");
+
                     // Отправляем текущие настройки в интерфейс администрирования
                     const settings = {
                         modemPort: this.config.modemPort,
                         modemBaudRate: this.config.modemBaudRate,
-                        users: this.config.users || [],
-                        devices: this.config.devices || [],
+                        users: users,
+                        devices: devices,
                     };
                     this.sendTo(obj.from, obj.command, settings, obj.callback);
                     break;
@@ -69,19 +73,13 @@ class DtmfAdapter extends utils.Adapter {
                     // Сохранение настроек
                     this.config.modemPort = obj.message.modemPort;
                     this.config.modemBaudRate = obj.message.modemBaudRate;
-                    this.config.users = obj.message.users || [];
-                    this.config.devices = obj.message.devices || [];
-
-                    // Сохраняем конфигурацию
-                    await this.saveConfig();
-                    this.log.info('Settings saved');
 
                     // Удаляем старые объекты пользователей и устройств
                     await this.deleteOldObjects("users");
                     await this.deleteOldObjects("devices");
 
                     // Создаем/обновляем объекты для пользователей и устройств
-                    await this.updateUsersAndDevices();
+                    await this.updateUsersAndDevices(obj.message.users, obj.message.devices);
 
                     this.sendTo(obj.from, obj.command, { success: true }, obj.callback);
                     break;
@@ -91,6 +89,29 @@ class DtmfAdapter extends utils.Adapter {
                     break;
             }
         }
+    }
+
+    /**
+     * Загрузка объектов из папки
+     */
+    async loadObjectsFromFolder(folder) {
+        const objects = await this.getObjectListAsync({
+            startkey: `${this.namespace}.${folder}.`,
+            endkey: `${this.namespace}.${folder}.\u9999`,
+        });
+
+        const result = [];
+        for (const obj of objects.rows) {
+            const state = await this.getStateAsync(obj.id);
+            if (state) {
+                result.push({
+                    id: obj.id,
+                    name: obj.common.name,
+                    value: state.val,
+                });
+            }
+        }
+        return result;
     }
 
     /**
@@ -115,10 +136,10 @@ class DtmfAdapter extends utils.Adapter {
     /**
      * Обновление объектов пользователей и устройств
      */
-    async updateUsersAndDevices() {
+    async updateUsersAndDevices(users, devices) {
         // Обработка пользователей
-        if (Array.isArray(this.config.users)) {
-            for (const user of this.config.users) {
+        if (Array.isArray(users)) {
+            for (const user of users) {
                 const userId = `users.${user.name.replace(/[^a-zA-Z0-9]/g, '_')}`; // Заменяем спецсимволы в имени
                 await this.extendObject(userId, {
                     type: 'state',
@@ -132,38 +153,13 @@ class DtmfAdapter extends utils.Adapter {
                     native: {},
                 });
 
-                await this.extendObject(`${userId}.phone`, {
-                    type: 'state',
-                    common: {
-                        name: `${user.name} Phone`,
-                        type: 'string',
-                        role: 'info',
-                        read: true,
-                        write: true, // Разрешаем запись
-                    },
-                    native: {},
-                });
-
-                await this.extendObject(`${userId}.devices`, {
-                    type: 'state',
-                    common: {
-                        name: `${user.name} Devices`,
-                        type: 'string',
-                        role: 'info',
-                        read: true,
-                        write: true, // Разрешаем запись
-                    },
-                    native: {},
-                });
-
-                await this.setStateAsync(`${userId}.phone`, user.phone, true);
-                await this.setStateAsync(`${userId}.devices`, user.devices, true);
+                await this.setStateAsync(userId, user.value, true);
             }
         }
 
         // Обработка устройств
-        if (Array.isArray(this.config.devices)) {
-            for (const device of this.config.devices) {
+        if (Array.isArray(devices)) {
+            for (const device of devices) {
                 const deviceId = `devices.${device.name.replace(/[^a-zA-Z0-9]/g, '_')}`; // Заменяем спецсимволы в имени
                 await this.extendObject(deviceId, {
                     type: 'state',
@@ -177,32 +173,7 @@ class DtmfAdapter extends utils.Adapter {
                     native: {},
                 });
 
-                await this.extendObject(`${deviceId}.object`, {
-                    type: 'state',
-                    common: {
-                        name: `${device.name} Object`,
-                        type: 'string',
-                        role: 'info',
-                        read: true,
-                        write: true, // Разрешаем запись
-                    },
-                    native: {},
-                });
-
-                await this.extendObject(`${deviceId}.dtmfCommand`, {
-                    type: 'state',
-                    common: {
-                        name: `${device.name} DTMF Command`,
-                        type: 'string',
-                        role: 'info',
-                        read: true,
-                        write: true, // Разрешаем запись
-                    },
-                    native: {},
-                });
-
-                await this.setStateAsync(`${deviceId}.object`, device.object, true);
-                await this.setStateAsync(`${deviceId}.dtmfCommand`, device.dtmfCommand, true);
+                await this.setStateAsync(deviceId, device.value, true);
             }
         }
     }
