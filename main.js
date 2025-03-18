@@ -1,5 +1,4 @@
-﻿
-"use strict";
+﻿"use strict";
 
 const utils = require("@iobroker/adapter-core");
 
@@ -30,6 +29,10 @@ class DtmfAdapter extends utils.Adapter {
         // Логируем текущую конфигурацию
         this.log.info(`Current config: ${JSON.stringify(this.config, null, 2)}`);
 
+        // Подписываемся на изменения в папках users и devices
+        await this.subscribeStatesAsync("users.*");
+        await this.subscribeStatesAsync("devices.*");
+
         // Создаем или обновляем объекты для пользователей и устройств
         await this.updateUsersAndDevices();
 
@@ -45,6 +48,16 @@ class DtmfAdapter extends utils.Adapter {
         }
 
         this.log.debug(`State ${id} changed to ${state.val}`);
+
+        // Если изменение произошло в папке users или devices, обновляем данные
+        if (id.startsWith(`${this.namespace}.users.`) || id.startsWith(`${this.namespace}.devices.`)) {
+            const users = await this.loadObjectsFromFolder("users");
+            const devices = await this.loadObjectsFromFolder("devices");
+
+            // Логируем обновленные данные
+            this.log.info(`Updated users: ${JSON.stringify(users, null, 2)}`);
+            this.log.info(`Updated devices: ${JSON.stringify(devices, null, 2)}`);
+        }
     }
 
     /**
