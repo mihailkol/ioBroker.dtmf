@@ -29,10 +29,7 @@ class DtmfAdapter extends utils.Adapter {
         // Логируем текущую конфигурацию
         this.log.info(`Current config: ${JSON.stringify(this.config, null, 2)}`);
 
-        // Создаем или обновляем объекты для пользователей и устройств
-        await this.updateUsersAndDevices();
-
-        this.log.info('Adapter ready and objects created/updated');
+        this.log.info('Adapter ready');
     }
 
     /**
@@ -54,21 +51,6 @@ class DtmfAdapter extends utils.Adapter {
             this.log.debug(`Received message: ${JSON.stringify(obj)}`);
 
             switch (obj.command) {
-                case 'getSettings':
-                    // Загружаем текущие объекты пользователей и устройств
-                    const users = await this.loadObjectsFromFolder("users");
-                    const devices = await this.loadObjectsFromFolder("devices");
-
-                    // Отправляем текущие настройки в интерфейс администрирования
-                    const settings = {
-                        modemPort: this.config.modemPort,
-                        modemBaudRate: this.config.modemBaudRate,
-                        users: users,
-                        devices: devices,
-                    };
-                    this.sendTo(obj.from, obj.command, settings, obj.callback);
-                    break;
-
                 case 'saveSettings':
                     // Сохранение настроек
                     this.config.modemPort = obj.message.modemPort;
@@ -89,29 +71,6 @@ class DtmfAdapter extends utils.Adapter {
                     break;
             }
         }
-    }
-
-    /**
-     * Загрузка объектов из папки
-     */
-    async loadObjectsFromFolder(folder) {
-        const objects = await this.getObjectListAsync({
-            startkey: `${this.namespace}.${folder}.`,
-            endkey: `${this.namespace}.${folder}.\u9999`,
-        });
-
-        const result = [];
-        for (const obj of objects.rows) {
-            const state = await this.getStateAsync(obj.id);
-            if (state) {
-                result.push({
-                    id: obj.id,
-                    name: obj.common.name,
-                    value: state.val,
-                });
-            }
-        }
-        return result;
     }
 
     /**
@@ -137,10 +96,14 @@ class DtmfAdapter extends utils.Adapter {
      * Обновление объектов пользователей и устройств
      */
     async updateUsersAndDevices(users, devices) {
+        this.log.info(`Users: ${JSON.stringify(users, null, 2)}`);
+        this.log.info(`Devices: ${JSON.stringify(devices, null, 2)}`);
+
         // Обработка пользователей
         if (Array.isArray(users)) {
             for (const user of users) {
-                const userId = `users.${user.name.replace(/[^a-zA-Z0-9]/g, '_')}`; // Заменяем спецсимволы в имени
+                const userId = `users.${user.name.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                this.log.info(`Creating user object: ${userId}`);
                 await this.extendObject(userId, {
                     type: 'state',
                     common: {
@@ -148,7 +111,7 @@ class DtmfAdapter extends utils.Adapter {
                         type: 'string',
                         role: 'info',
                         read: true,
-                        write: true, // Разрешаем запись
+                        write: true,
                     },
                     native: {},
                 });
@@ -160,7 +123,8 @@ class DtmfAdapter extends utils.Adapter {
         // Обработка устройств
         if (Array.isArray(devices)) {
             for (const device of devices) {
-                const deviceId = `devices.${device.name.replace(/[^a-zA-Z0-9]/g, '_')}`; // Заменяем спецсимволы в имени
+                const deviceId = `devices.${device.name.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                this.log.info(`Creating device object: ${deviceId}`);
                 await this.extendObject(deviceId, {
                     type: 'state',
                     common: {
@@ -168,7 +132,7 @@ class DtmfAdapter extends utils.Adapter {
                         type: 'string',
                         role: 'info',
                         read: true,
-                        write: true, // Разрешаем запись
+                        write: true,
                     },
                     native: {},
                 });
