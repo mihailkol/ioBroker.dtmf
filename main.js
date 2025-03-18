@@ -29,10 +29,6 @@ class DtmfAdapter extends utils.Adapter {
         // Логируем текущую конфигурацию
         this.log.info(`Current config: ${JSON.stringify(this.config, null, 2)}`);
 
-        // Подписываемся на изменения в папках users и devices
-        await this.subscribeStatesAsync("users.*");
-        await this.subscribeStatesAsync("devices.*");
-
         // Создаем или обновляем объекты для пользователей и устройств
         await this.updateUsersAndDevices();
 
@@ -48,16 +44,6 @@ class DtmfAdapter extends utils.Adapter {
         }
 
         this.log.debug(`State ${id} changed to ${state.val}`);
-
-        // Если изменение произошло в папке users или devices, обновляем данные
-        if (id.startsWith(`${this.namespace}.users.`) || id.startsWith(`${this.namespace}.devices.`)) {
-            const users = await this.loadObjectsFromFolder("users");
-            const devices = await this.loadObjectsFromFolder("devices");
-
-            // Логируем обновленные данные
-            this.log.info(`Updated users: ${JSON.stringify(users, null, 2)}`);
-            this.log.info(`Updated devices: ${JSON.stringify(devices, null, 2)}`);
-        }
     }
 
     /**
@@ -89,8 +75,8 @@ class DtmfAdapter extends utils.Adapter {
                     this.config.modemBaudRate = obj.message.modemBaudRate;
 
                     // Удаляем старые объекты пользователей и устройств
-                    //await this.deleteOldObjects("users");
-                    //await this.deleteOldObjects("devices");
+                    await this.deleteOldObjects("users");
+                    await this.deleteOldObjects("devices");
 
                     // Создаем/обновляем объекты для пользователей и устройств
                     await this.updateUsersAndDevices(obj.message.users, obj.message.devices);
@@ -107,7 +93,7 @@ class DtmfAdapter extends utils.Adapter {
 
     /**
      * Загрузка объектов из папки
-     
+     */
     async loadObjectsFromFolder(folder) {
         const objects = await this.getObjectListAsync({
             startkey: `${this.namespace}.${folder}.`,
@@ -130,7 +116,7 @@ class DtmfAdapter extends utils.Adapter {
 
     /**
      * Удаление старых объектов пользователей или устройств
-     
+     */
     async deleteOldObjects(folder) {
         try {
             const objects = await this.getObjectListAsync({
@@ -146,8 +132,6 @@ class DtmfAdapter extends utils.Adapter {
             this.log.error(`Error deleting old objects: ${err}`);
         }
     }
-    */
-
 
     /**
      * Обновление объектов пользователей и устройств
