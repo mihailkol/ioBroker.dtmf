@@ -130,7 +130,7 @@ class DtmfAdapter extends utils.Adapter {
 
     /**
      * Удаление старых объектов пользователей или устройств
-     */
+     
     async deleteOldObjects(folder) {
         try {
             const objects = await this.getObjectListAsync({
@@ -146,6 +146,8 @@ class DtmfAdapter extends utils.Adapter {
             this.log.error(`Error deleting old objects: ${err}`);
         }
     }
+    */
+
 
     /**
      * Обновление объектов пользователей и устройств
