@@ -127,7 +127,7 @@ class DtmfAdapter extends utils.Adapter {
                         type: 'string',
                         role: 'info',
                         read: true,
-                        write: false,
+                        write: true, // Разрешаем запись
                     },
                     native: {},
                 });
@@ -139,7 +139,7 @@ class DtmfAdapter extends utils.Adapter {
                         type: 'string',
                         role: 'info',
                         read: true,
-                        write: false,
+                        write: true, // Разрешаем запись
                     },
                     native: {},
                 });
@@ -151,7 +151,7 @@ class DtmfAdapter extends utils.Adapter {
                         type: 'string',
                         role: 'info',
                         read: true,
-                        write: false,
+                        write: true, // Разрешаем запись
                     },
                     native: {},
                 });
@@ -172,7 +172,7 @@ class DtmfAdapter extends utils.Adapter {
                         type: 'string',
                         role: 'info',
                         read: true,
-                        write: false,
+                        write: true, // Разрешаем запись
                     },
                     native: {},
                 });
@@ -184,7 +184,7 @@ class DtmfAdapter extends utils.Adapter {
                         type: 'string',
                         role: 'info',
                         read: true,
-                        write: false,
+                        write: true, // Разрешаем запись
                     },
                     native: {},
                 });
@@ -196,7 +196,7 @@ class DtmfAdapter extends utils.Adapter {
                         type: 'string',
                         role: 'info',
                         read: true,
-                        write: false,
+                        write: true, // Разрешаем запись
                     },
                     native: {},
                 });
