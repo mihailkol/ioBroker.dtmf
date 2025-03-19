@@ -11,7 +11,6 @@ class DtmfAdapter extends utils.Adapter {
 
         // Подписка на события
         this.on("ready", this.onReady.bind(this));
-        this.on("message", this.onMessage.bind(this));
     }
 
     /**
@@ -19,38 +18,22 @@ class DtmfAdapter extends utils.Adapter {
      */
     async onReady() {
         this.log.info("Adapter initialized");
+
+        // Логируем текущую конфигурацию
+        this.log.info(`Current config: ${JSON.stringify(this.config, null, 2)}`);
+
+        // Создаем объекты пользователей и устройств на основе конфигурации
+        await this.createUsersAndDevices(this.config.users, this.config.devices);
+
         this.log.info('Adapter ready');
-        await this.updateUsersAndDevices(obj.message.users, obj.message.devices);
     }
 
     /**
-     * Обработка сообщений
+     * Создание объектов пользователей и устройств
      */
-    async onMessage(obj) {
-        if (typeof obj === 'object' && obj.command) {
-            this.log.debug(`Received message: ${JSON.stringify(obj)}`);
-
-            switch (obj.command) {
-                case 'saveSettings':
-                    // Создаем/обновляем объекты для пользователей и устройств
-                    await this.updateUsersAndDevices(obj.message.users, obj.message.devices);
-
-                    this.sendTo(obj.from, obj.command, { success: true }, obj.callback);
-                    break;
-
-                default:
-                    this.log.warn(`Unknown command: ${obj.command}`);
-                    break;
-            }
-        }
-    }
-
-    /**
-     * Обновление объектов пользователей и устройств
-     */
-    async updateUsersAndDevices(users, devices) {
-        this.log.info(`Users: ${JSON.stringify(users, null, 2)}`);
-        this.log.info(`Devices: ${JSON.stringify(devices, null, 2)}`);
+    async createUsersAndDevices(users, devices) {
+        this.log.info(`Users from config: ${JSON.stringify(users, null, 2)}`);
+        this.log.info(`Devices from config: ${JSON.stringify(devices, null, 2)}`);
 
         // Обработка пользователей
         if (Array.isArray(users)) {
@@ -74,6 +57,8 @@ class DtmfAdapter extends utils.Adapter {
                 // Устанавливаем значение состояния
                 await this.setStateAsync(userId, { phone: user.phone, devices: user.devices }, true);
             }
+        } else {
+            this.log.warn("Users data is not an array or not provided");
         }
 
         // Обработка устройств
@@ -98,6 +83,8 @@ class DtmfAdapter extends utils.Adapter {
                 // Устанавливаем значение состояния
                 await this.setStateAsync(deviceId, { deviceId: device.deviceId, DTMF: device.DTMF }, true);
             }
+        } else {
+            this.log.warn("Devices data is not an array or not provided");
         }
     }
 }
