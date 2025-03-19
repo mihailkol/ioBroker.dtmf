@@ -9,15 +9,9 @@ class DtmfAdapter extends utils.Adapter {
             name: "dtmf", // Название адаптера
         });
 
-        // Инициализация переменных
-        this.users = {}; // Объект для хранения пользователей
-        this.devices = {}; // Объект для хранения устройств
-
         // Подписка на события
         this.on("ready", this.onReady.bind(this));
-        this.on("stateChange", this.onStateChange.bind(this));
         this.on("message", this.onMessage.bind(this));
-        this.on("unload", this.onUnload.bind(this));
     }
 
     /**
@@ -25,22 +19,7 @@ class DtmfAdapter extends utils.Adapter {
      */
     async onReady() {
         this.log.info("Adapter initialized");
-
-        // Логируем текущую конфигурацию
-        this.log.info(`Current config: ${JSON.stringify(this.config, null, 2)}`);
-
         this.log.info('Adapter ready');
-    }
-
-    /**
-     * Обработка изменения состояний
-     */
-    async onStateChange(id, state) {
-        if (!state || state.ack) {
-            return;
-        }
-
-        this.log.debug(`State ${id} changed to ${state.val}`);
     }
 
     /**
@@ -52,14 +31,6 @@ class DtmfAdapter extends utils.Adapter {
 
             switch (obj.command) {
                 case 'saveSettings':
-                    // Сохранение настроек
-                    this.config.modemPort = obj.message.modemPort;
-                    this.config.modemBaudRate = obj.message.modemBaudRate;
-
-                    // Удаляем старые объекты пользователей и устройств
-                    await this.deleteOldObjects("users");
-                    await this.deleteOldObjects("devices");
-
                     // Создаем/обновляем объекты для пользователей и устройств
                     await this.updateUsersAndDevices(obj.message.users, obj.message.devices);
 
@@ -70,25 +41,6 @@ class DtmfAdapter extends utils.Adapter {
                     this.log.warn(`Unknown command: ${obj.command}`);
                     break;
             }
-        }
-    }
-
-    /**
-     * Удаление старых объектов пользователей или устройств
-     */
-    async deleteOldObjects(folder) {
-        try {
-            const objects = await this.getObjectListAsync({
-                startkey: `${this.namespace}.${folder}.`,
-                endkey: `${this.namespace}.${folder}.\u9999`,
-            });
-
-            for (const obj of objects.rows) {
-                await this.delObjectAsync(obj.id);
-                this.log.debug(`Deleted old object: ${obj.id}`);
-            }
-        } catch (err) {
-            this.log.error(`Error deleting old objects: ${err}`);
         }
     }
 
@@ -116,7 +68,7 @@ class DtmfAdapter extends utils.Adapter {
                     native: {},
                 });
 
-                await this.setStateAsync(userId, user.value, true);
+                await this.setStateAsync(userId, { phone: user.phone, devices: user.devices }, true);
             }
         }
 
@@ -137,22 +89,8 @@ class DtmfAdapter extends utils.Adapter {
                     native: {},
                 });
 
-                await this.setStateAsync(deviceId, device.value, true);
+                await this.setStateAsync(deviceId, { deviceId: device.deviceId, DTMF: device.DTMF }, true);
             }
-        }
-    }
-
-    /**
-     * Выгрузка адаптера
-     */
-    async onUnload(callback) {
-        try {
-            this.log.info("Adapter shutting down...");
-            // Очистка ресурсов, если необходимо
-        } catch (err) {
-            this.log.error(`Error during shutdown: ${err}`);
-        } finally {
-            callback();
         }
     }
 }
