@@ -36,19 +36,19 @@ class DtmfAdapter extends utils.Adapter {
         this.log.info(`Devices from config: ${JSON.stringify(devices, null, 2)}`);
 
         // Получаем текущие объекты пользователей и устройств
-        const currentUsers = await this.getObjectsAsync(`${this.namespace}.users.*`);
-        const currentDevices = await this.getObjectsAsync(`${this.namespace}.devices.*`);
+        const currentUsers = await this.getObjectListAsync({ startkey: `${this.namespace}.users.`, endkey: `${this.namespace}.users.\u9999` });
+        const currentDevices = await this.getObjectListAsync({ startkey: `${this.namespace}.devices.`, endkey: `${this.namespace}.devices.\u9999` });
 
         // Обработка пользователей
         if (Array.isArray(users)) {
             const userNames = users.map(user => user.name.replace(/[^a-zA-Z0-9]/g, '_'));
 
             // Удаляем пользователей, которых больше нет в конфигурации
-            for (const userObj of currentUsers) {
-                const userName = userObj._id.split('.').pop();
+            for (const userObj of currentUsers.rows) {
+                const userName = userObj.id.split('.').pop();
                 if (!userNames.includes(userName)) {
-                    this.log.info(`Deleting user object: ${userObj._id}`);
-                    await this.delObjectAsync(userObj._id);
+                    this.log.info(`Deleting user object: ${userObj.id}`);
+                    await this.delObjectAsync(userObj.id);
                 }
             }
 
@@ -104,11 +104,11 @@ class DtmfAdapter extends utils.Adapter {
             const deviceNames = devices.map(device => device.name.replace(/[^a-zA-Z0-9]/g, '_'));
 
             // Удаляем устройства, которых больше нет в конфигурации
-            for (const deviceObj of currentDevices) {
-                const deviceName = deviceObj._id.split('.').pop();
+            for (const deviceObj of currentDevices.rows) {
+                const deviceName = deviceObj.id.split('.').pop();
                 if (!deviceNames.includes(deviceName)) {
-                    this.log.info(`Deleting device object: ${deviceObj._id}`);
-                    await this.delObjectAsync(deviceObj._id);
+                    this.log.info(`Deleting device object: ${deviceObj.id}`);
+                    await this.delObjectAsync(deviceObj.id);
                 }
             }
 
