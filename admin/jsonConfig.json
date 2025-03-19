@@ -36,7 +36,7 @@
 					"max": 115200
 				},
 				"checkModemConnection": {
-					"type": "button",
+					"type": "staticText",
 					"newLine": true,
 					"xs": 12,
 					"sm": 12,
@@ -44,8 +44,8 @@
 					"lg": 4,
 					"xl": 4,
 					"label": "Check Modem Connection",
-					"text": "Check Connection",
-					"onClick": "sendTo('dtmf.0', 'checkModemConnection', {}, (response) => { alert(response.success ? 'Modem is connected!' : 'Error: ' + response.error); });"
+					"text": "<button onclick='sendTo(\"dtmf.0\", \"checkModemConnection\", {}, (response) => { alert(response.success ? \"Modem is connected!\" : \"Error: \" + response.error); })'>Check Connection</button>",
+					"hidden": false
 				}
 			}
 		},
