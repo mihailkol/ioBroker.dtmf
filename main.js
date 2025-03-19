@@ -43,19 +43,41 @@ class DtmfAdapter extends utils.Adapter {
 
                 // Создаем объект пользователя
                 await this.setObjectNotExistsAsync(userId, {
-                    type: 'state',
+                    type: 'folder',
                     common: {
                         name: user.name,
-                        type: 'object',
+                        role: 'info',
+                    },
+                    native: {},
+                });
+
+                // Создаем состояние для телефона
+                await this.setObjectNotExistsAsync(`${userId}.phone`, {
+                    type: 'state',
+                    common: {
+                        name: 'Phone number',
+                        type: 'string',
                         role: 'info',
                         read: true,
                         write: true,
                     },
                     native: {},
                 });
+                await this.setStateAsync(`${userId}.phone`, user.phone, true);
 
-                // Устанавливаем значение состояния
-                await this.setStateAsync(userId, { phone: user.phone, devices: user.devices }, true);
+                // Создаем состояние для устройств
+                await this.setObjectNotExistsAsync(`${userId}.devices`, {
+                    type: 'state',
+                    common: {
+                        name: 'Devices',
+                        type: 'string', // Если devices - это массив, можно использовать 'array'
+                        role: 'info',
+                        read: true,
+                        write: true,
+                    },
+                    native: {},
+                });
+                await this.setStateAsync(`${userId}.devices`, JSON.stringify(user.devices), true); // Сохраняем как строку
             }
         } else {
             this.log.warn("Users data is not an array or not provided");
@@ -69,19 +91,41 @@ class DtmfAdapter extends utils.Adapter {
 
                 // Создаем объект устройства
                 await this.setObjectNotExistsAsync(deviceId, {
-                    type: 'state',
+                    type: 'folder',
                     common: {
                         name: device.name,
-                        type: 'object',
+                        role: 'info',
+                    },
+                    native: {},
+                });
+
+                // Создаем состояние для deviceId
+                await this.setObjectNotExistsAsync(`${deviceId}.deviceId`, {
+                    type: 'state',
+                    common: {
+                        name: 'Device ID',
+                        type: 'string',
                         role: 'info',
                         read: true,
                         write: true,
                     },
                     native: {},
                 });
+                await this.setStateAsync(`${deviceId}.deviceId`, device.deviceId, true);
 
-                // Устанавливаем значение состояния
-                await this.setStateAsync(deviceId, { deviceId: device.deviceId, DTMF: device.DTMF }, true);
+                // Создаем состояние для DTMF
+                await this.setObjectNotExistsAsync(`${deviceId}.DTMF`, {
+                    type: 'state',
+                    common: {
+                        name: 'DTMF',
+                        type: 'number',
+                        role: 'info',
+                        read: true,
+                        write: true,
+                    },
+                    native: {},
+                });
+                await this.setStateAsync(`${deviceId}.DTMF`, device.DTMF, true);
             }
         } else {
             this.log.warn("Devices data is not an array or not provided");
