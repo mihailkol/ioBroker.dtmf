@@ -20,6 +20,7 @@ class DtmfAdapter extends utils.Adapter {
     async onReady() {
         this.log.info("Adapter initialized");
         this.log.info('Adapter ready');
+        await this.updateUsersAndDevices(obj.message.users, obj.message.devices);
     }
 
     /**
@@ -56,11 +57,13 @@ class DtmfAdapter extends utils.Adapter {
             for (const user of users) {
                 const userId = `users.${user.name.replace(/[^a-zA-Z0-9]/g, '_')}`;
                 this.log.info(`Creating user object: ${userId}`);
-                await this.extendObject(userId, {
+
+                // Создаем объект пользователя
+                await this.setObjectNotExistsAsync(userId, {
                     type: 'state',
                     common: {
                         name: user.name,
-                        type: 'string',
+                        type: 'object',
                         role: 'info',
                         read: true,
                         write: true,
@@ -68,6 +71,7 @@ class DtmfAdapter extends utils.Adapter {
                     native: {},
                 });
 
+                // Устанавливаем значение состояния
                 await this.setStateAsync(userId, { phone: user.phone, devices: user.devices }, true);
             }
         }
@@ -77,11 +81,13 @@ class DtmfAdapter extends utils.Adapter {
             for (const device of devices) {
                 const deviceId = `devices.${device.name.replace(/[^a-zA-Z0-9]/g, '_')}`;
                 this.log.info(`Creating device object: ${deviceId}`);
-                await this.extendObject(deviceId, {
+
+                // Создаем объект устройства
+                await this.setObjectNotExistsAsync(deviceId, {
                     type: 'state',
                     common: {
                         name: device.name,
-                        type: 'string',
+                        type: 'object',
                         role: 'info',
                         read: true,
                         write: true,
@@ -89,6 +95,7 @@ class DtmfAdapter extends utils.Adapter {
                     native: {},
                 });
 
+                // Устанавливаем значение состояния
                 await this.setStateAsync(deviceId, { deviceId: device.deviceId, DTMF: device.DTMF }, true);
             }
         }
