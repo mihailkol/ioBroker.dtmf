@@ -1,6 +1,7 @@
 ﻿"use strict";
 
 const utils = require("@iobroker/adapter-core");
+const SerialPort = require("serialport"); // Подключение библиотеки для работы с последовательным портом
 
 class DtmfAdapter extends utils.Adapter {
     constructor(options = {}) {
@@ -9,8 +10,12 @@ class DtmfAdapter extends utils.Adapter {
             name: "dtmf", // Название адаптера
         });
 
+        this.modemPort = null; // Переменная для хранения экземпляра порта
+
         // Подписка на события
         this.on("ready", this.onReady.bind(this));
+        this.on("message", this.onMessage.bind(this));
+        this.on("unload", this.onUnload.bind(this));
     }
 
     /**
@@ -22,10 +27,90 @@ class DtmfAdapter extends utils.Adapter {
         // Логируем текущую конфигурацию
         this.log.info(`Current config: ${JSON.stringify(this.config, null, 2)}`);
 
+        // Открываем порт модема
+        await this.openModemPort();
+
         // Создаем или обновляем объекты пользователей и устройств на основе конфигурации
         await this.syncUsersAndDevices(this.config.users, this.config.devices);
 
         this.log.info('Adapter ready');
+    }
+
+    /**
+     * Открытие порта модема
+     */
+    async openModemPort() {
+        if (this.config.modemPort && this.config.modemBaudRate) {
+            try {
+                this.modemPort = new SerialPort(this.config.modemPort, {
+                    baudRate: parseInt(this.config.modemBaudRate, 10),
+                });
+
+                this.modemPort.on('open', () => {
+                    this.log.info(`Modem port opened: ${this.config.modemPort}`);
+                });
+
+                this.modemPort.on('error', (err) => {
+                    this.log.error(`Modem port error: ${err.message}`);
+                });
+            } catch (err) {
+                this.log.error(`Failed to open modem port: ${err.message}`);
+            }
+        } else {
+            this.log.warn('Modem port or baud rate not configured');
+        }
+    }
+
+    /**
+     * Закрытие порта модема
+     */
+    async closeModemPort() {
+        if (this.modemPort) {
+            this.modemPort.close((err) => {
+                if (err) {
+                    this.log.error(`Failed to close modem port: ${err.message}`);
+                } else {
+                    this.log.info('Modem port closed');
+                }
+            });
+        }
+    }
+
+    /**
+     * Проверка соединения с модемом
+     */
+    async checkModemConnection() {
+        if (!this.modemPort) {
+            return { success: false, error: 'Modem port is not open' };
+        }
+
+        try {
+            // Отправляем тестовую команду (например, AT)
+            this.modemPort.write('AT\r', (err) => {
+                if (err) {
+                    return { success: false, error: `Failed to send command: ${err.message}` };
+                }
+            });
+
+            // Ожидаем ответа от модема
+            return new Promise((resolve) => {
+                this.modemPort.once('data', (data) => {
+                    const response = data.toString().trim();
+                    if (response.includes('OK')) {
+                        resolve({ success: true });
+                    } else {
+                        resolve({ success: false, error: `Unexpected response: ${response}` });
+                    }
+                });
+
+                // Таймаут для ответа
+                setTimeout(() => {
+                    resolve({ success: false, error: 'Timeout: No response from modem' });
+                }, 2000); // Таймаут 2 секунды
+            });
+        } catch (err) {
+            return { success: false, error: `Error checking modem connection: ${err.message}` };
+        }
     }
 
     /**
@@ -157,6 +242,42 @@ class DtmfAdapter extends utils.Adapter {
             }
         } else {
             this.log.warn("Devices data is not an array or not provided");
+        }
+    }
+
+    /**
+     * Обработка сообщений
+     */
+    async onMessage(obj) {
+        if (typeof obj === 'object' && obj.command) {
+            this.log.debug(`Received message: ${JSON.stringify(obj)}`);
+
+            switch (obj.command) {
+                case 'checkModemConnection':
+                    const result = await this.checkModemConnection();
+                    this.sendTo(obj.from, obj.command, result, obj.callback);
+                    break;
+
+                default:
+                    this.log.warn(`Unknown command: ${obj.command}`);
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Выгрузка адаптера
+     */
+    async onUnload(callback) {
+        try {
+            this.log.info("Adapter shutting down...");
+
+            // Закрываем порт модема
+            await this.closeModemPort();
+        } catch (err) {
+            this.log.error(`Error during shutdown: ${err}`);
+        } finally {
+            callback();
         }
     }
 }

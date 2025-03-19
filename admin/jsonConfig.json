@@ -34,6 +34,18 @@
 					"default": 9600,
 					"min": 1200,
 					"max": 115200
+				},
+				"checkModemConnection": {
+					"type": "button",
+					"newLine": true,
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 4,
+					"xl": 4,
+					"label": "Check Modem Connection",
+					"text": "Check Connection",
+					"onClick": "sendTo('dtmf.0', 'checkModemConnection', {}, (response) => { alert(response.success ? 'Modem is connected!' : 'Error: ' + response.error); });"
 				}
 			}
 		},
