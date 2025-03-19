@@ -22,24 +22,40 @@ class DtmfAdapter extends utils.Adapter {
         // Логируем текущую конфигурацию
         this.log.info(`Current config: ${JSON.stringify(this.config, null, 2)}`);
 
-        // Создаем объекты пользователей и устройств на основе конфигурации
-        await this.createUsersAndDevices(this.config.users, this.config.devices);
+        // Создаем или обновляем объекты пользователей и устройств на основе конфигурации
+        await this.syncUsersAndDevices(this.config.users, this.config.devices);
 
         this.log.info('Adapter ready');
     }
 
     /**
-     * Создание объектов пользователей и устройств
+     * Синхронизация объектов пользователей и устройств
      */
-    async createUsersAndDevices(users, devices) {
+    async syncUsersAndDevices(users, devices) {
         this.log.info(`Users from config: ${JSON.stringify(users, null, 2)}`);
         this.log.info(`Devices from config: ${JSON.stringify(devices, null, 2)}`);
 
+        // Получаем текущие объекты пользователей и устройств
+        const currentUsers = await this.getObjectsAsync(`${this.namespace}.users.*`);
+        const currentDevices = await this.getObjectsAsync(`${this.namespace}.devices.*`);
+
         // Обработка пользователей
         if (Array.isArray(users)) {
+            const userNames = users.map(user => user.name.replace(/[^a-zA-Z0-9]/g, '_'));
+
+            // Удаляем пользователей, которых больше нет в конфигурации
+            for (const userObj of currentUsers) {
+                const userName = userObj._id.split('.').pop();
+                if (!userNames.includes(userName)) {
+                    this.log.info(`Deleting user object: ${userObj._id}`);
+                    await this.delObjectAsync(userObj._id);
+                }
+            }
+
+            // Создаем или обновляем пользователей
             for (const user of users) {
                 const userId = `users.${user.name.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                this.log.info(`Creating user object: ${userId}`);
+                this.log.info(`Creating/updating user object: ${userId}`);
 
                 // Создаем объект пользователя
                 await this.setObjectNotExistsAsync(userId, {
@@ -85,9 +101,21 @@ class DtmfAdapter extends utils.Adapter {
 
         // Обработка устройств
         if (Array.isArray(devices)) {
+            const deviceNames = devices.map(device => device.name.replace(/[^a-zA-Z0-9]/g, '_'));
+
+            // Удаляем устройства, которых больше нет в конфигурации
+            for (const deviceObj of currentDevices) {
+                const deviceName = deviceObj._id.split('.').pop();
+                if (!deviceNames.includes(deviceName)) {
+                    this.log.info(`Deleting device object: ${deviceObj._id}`);
+                    await this.delObjectAsync(deviceObj._id);
+                }
+            }
+
+            // Создаем или обновляем устройства
             for (const device of devices) {
                 const deviceId = `devices.${device.name.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                this.log.info(`Creating device object: ${deviceId}`);
+                this.log.info(`Creating/updating device object: ${deviceId}`);
 
                 // Создаем объект устройства
                 await this.setObjectNotExistsAsync(deviceId, {
