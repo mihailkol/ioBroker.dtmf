@@ -1,5 +1,6 @@
 ﻿"use strict";
 
+
 const utils = require("@iobroker/adapter-core");
 const path = require('path');
 
