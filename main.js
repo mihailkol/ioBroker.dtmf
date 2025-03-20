@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 const utils = require("@iobroker/adapter-core");
 const SerialPort = require("serialport"); // Подключение библиотеки для работы с последовательным портом
