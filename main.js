@@ -1,11 +1,7 @@
 ﻿"use strict";
 
-
 const utils = require("@iobroker/adapter-core");
-const path = require('path');
-
-const globalSerialportPath = path.join(process.env.NODE_PATH, 'serialport');
-const SerialPort = require(globalSerialportPath);
+const SerialPort = require("serialport"); // Подключение библиотеки для работы с последовательным портом
 
 class DtmfAdapter extends utils.Adapter {
     constructor(options = {}) {
