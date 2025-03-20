@@ -36,7 +36,7 @@
     "dependencies": [
       {
         "js-controller": ">=5.0.19",
-        "serialport": "^13.0.0"
+        "serialport": "^10.8.0"
       }
     ],
     "globalDependencies": [
