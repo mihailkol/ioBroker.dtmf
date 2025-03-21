@@ -22,7 +22,7 @@
     "icon": "dtmf.png",
     "enabled": true,
     "extIcon": "https://github.com/mihailkol/ioBroker.dtmf/blob/master/admin/dtmf.png",
-    "readme": "https://github.com/your-repo/ioBroker.dtmf/blob/master/README.md",
+    "readme": "https://github.com/mihailkol/ioBroker.dtmf/blob/master/README.md",
     "loglevel": "info",
     "mode": "daemon",
     "type": "communication",
